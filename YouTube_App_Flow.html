@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YouTube Unified Platform — App Flow</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root {
+  --yt-red: #FF0000;
+  --yt-red-soft: rgba(255,0,0,0.12);
+  --yt-black: #0f0f0f;
+  --yt-card: #272727;
+  --yt-border: rgba(255,255,255,0.10);
+  --yt-muted: #aaaaaa;
+  --audio-accent: #7c4dff;
+  --audio-soft: rgba(124,77,255,0.15);
+  --active-green: #00e676;
+  --shadow: 0 40px 80px rgba(0,0,0,0.5);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'DM Sans',sans-serif; background:#080808; min-height:100vh; padding:40px 16px 60px; }
+.page-title { text-align:center; margin-bottom:48px; }
+.page-title h1 { font-family:'DM Serif Display',serif; font-size:36px; color:#fff; }
+.page-title h1 span { color:var(--yt-red); }
+.page-title p { font-size:12px; color:var(--yt-muted); margin-top:6px; }
+.flow { display:flex; gap:20px; justify-content:center; align-items:flex-start; flex-wrap:wrap; }
+.arrow { display:flex; align-items:center; justify-content:center; padding-top:300px; color:var(--yt-red); font-size:24px; flex-shrink:0; opacity:0.6; }
+.screen-wrap { display:flex; flex-direction:column; align-items:center; gap:12px; }
+.step-badge { width:26px; height:26px; border-radius:50%; background:var(--yt-red); color:#fff; font-size:12px; font-weight:700; display:flex; align-items:center; justify-content:center; }
+.screen-label { font-size:9px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--yt-muted); text-align:center; max-width:130px; }
+.phone { width:280px; height:620px; border-radius:36px; background:var(--yt-black); box-shadow:var(--shadow),0 0 0 1.5px #2a2a2a; overflow:hidden; position:relative; display:flex; flex-direction:column; flex-shrink:0; }
+.phone::before { content:''; position:absolute; top:10px; left:50%; transform:translateX(-50%); width:80px; height:22px; background:#000; border-radius:12px; z-index:20; }
+.status { display:flex; justify-content:space-between; align-items:center; padding:38px 16px 5px; font-size:10px; font-weight:700; color:#fff; position:relative; z-index:5; flex-shrink:0; }
+.status-r { display:flex; gap:4px; }
+.yt-hdr { display:flex; align-items:center; justify-content:space-between; padding:4px 12px 8px; flex-shrink:0; }
+.yt-logo { display:flex; align-items:center; gap:5px; }
+.yt-logo-box { width:26px; height:18px; background:var(--yt-red); border-radius:4px; display:flex; align-items:center; justify-content:center; font-size:9px; color:#fff; }
+.yt-logo-text { font-size:17px; font-weight:700; color:#fff; }
+.yt-hdr-right { display:flex; align-items:center; gap:10px; }
+.yt-hdr-right span { font-size:17px; color:#fff; cursor:pointer; }
+.audio-mode-btn { display:flex; align-items:center; gap:4px; background:var(--audio-soft); border:1.5px solid var(--audio-accent); border-radius:16px; padding:4px 9px; font-size:10px; font-weight:700; color:var(--audio-accent); cursor:pointer; position:relative; }
+.tap-hint { position:absolute; top:30px; right:0; background:var(--audio-accent); color:#fff; font-size:8px; font-weight:700; padding:3px 8px; border-radius:8px; white-space:nowrap; z-index:30; }
+.tap-hint::before { content:''; position:absolute; top:-5px; right:10px; border:5px solid transparent; border-bottom-color:var(--audio-accent); }
+.video-mode-btn { display:flex; align-items:center; gap:4px; background:rgba(255,255,255,0.08); border:1.5px solid rgba(255,255,255,0.25); border-radius:16px; padding:4px 9px; font-size:10px; font-weight:700; color:#fff; cursor:pointer; }
+.yt-pills { display:flex; gap:6px; padding:0 12px 8px; overflow-x:auto; flex-shrink:0; }
+.yt-pills::-webkit-scrollbar { display:none; }
+.pill { padding:5px 10px; border-radius:20px; font-size:10px; font-weight:600; white-space:nowrap; flex-shrink:0; cursor:pointer; }
+.pill.a { background:#fff; color:#000; }
+.pill.i { background:var(--yt-card); color:#fff; }
+.yt-feed { flex:1; overflow-y:auto; }
+.yt-feed::-webkit-scrollbar { display:none; }
+.yt-card { cursor:pointer; margin-bottom:14px; }
+.yt-thumb { width:100%; height:148px; position:relative; overflow:hidden; }
+.yt-thumb-bg { width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:44px; }
+.t1 { background:linear-gradient(135deg,#1a1a2e,#16213e); }
+.t2 { background:linear-gradient(135deg,#2d1b69,#11998e); }
+.t3 { background:linear-gradient(135deg,#4a0000,#cc0000); }
+.t4 { background:linear-gradient(135deg,#1b4332,#52b788); }
+.yt-dur { position:absolute; bottom:5px; right:7px; background:rgba(0,0,0,0.85); color:#fff; font-size:9px; font-weight:700; padding:2px 5px; border-radius:3px; }
+.yt-audio-tag { position:absolute; top:5px; left:7px; background:var(--audio-accent); color:#fff; font-size:7px; font-weight:800; padding:2px 5px; border-radius:3px; }
+.yt-live-tag { position:absolute; top:5px; left:7px; background:var(--yt-red); color:#fff; font-size:7px; font-weight:800; padding:2px 5px; border-radius:3px; }
+.select-ring { position:absolute; inset:0; border:3px solid var(--yt-red); pointer-events:none; }
+.select-ring::after { content:'Tap to play'; position:absolute; bottom:7px; left:50%; transform:translateX(-50%); background:var(--yt-red); color:#fff; font-size:8px; font-weight:700; padding:2px 10px; border-radius:8px; white-space:nowrap; }
+.yt-card-info { display:flex; gap:8px; padding:7px 12px; }
+.yt-av { width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:#fff; flex-shrink:0; }
+.av-r{background:var(--yt-red)} .av-b{background:#1565c0} .av-g{background:#2e7d32} .av-o{background:#e65100}
+.yt-ct { flex:1; min-width:0; }
+.yt-ct-title { font-size:11px; font-weight:600; color:#fff; line-height:1.4; margin-bottom:2px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+.yt-ct-meta { font-size:9px; color:var(--yt-muted); }
+.yt-dots { font-size:14px; color:var(--yt-muted); }
+.yt-nav { display:flex; justify-content:space-around; padding:7px 0 16px; background:#000; border-top:1px solid var(--yt-border); flex-shrink:0; }
+.yt-nav-item { display:flex; flex-direction:column; align-items:center; gap:2px; font-size:7px; font-weight:600; color:var(--yt-muted); cursor:pointer; }
+.yt-nav-item.active { color:#fff; }
+.yt-nav-item span { font-size:17px; }
+
+/* Audio Home */
+.audio-home { flex:1; background:linear-gradient(180deg,#120a2e,#0d0d1a 60%,#0a0a0a); overflow-y:auto; }
+.audio-home::-webkit-scrollbar { display:none; }
+.anp { margin:8px 12px; background:var(--audio-soft); border:1px solid var(--audio-accent); border-radius:10px; padding:8px 10px; display:flex; align-items:center; gap:8px; }
+.anp-art { width:38px; height:38px; border-radius:7px; background:linear-gradient(135deg,#7c4dff,#e040fb); display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0; }
+.anp-info { flex:1; }
+.anp-name { font-size:12px; font-weight:700; color:#fff; }
+.anp-sub { font-size:9px; color:var(--audio-accent); }
+.anp-play { font-size:20px; color:var(--audio-accent); }
+.ah-title { padding:8px 12px 2px; font-family:'DM Serif Display',serif; font-size:16px; color:#fff; }
+.ah-sub { padding:0 12px 8px; font-size:9px; color:rgba(255,255,255,0.35); }
+.ac { display:flex; align-items:center; gap:8px; padding:7px 12px; border-bottom:1px solid rgba(255,255,255,0.04); }
+.ac-art { width:44px; height:44px; border-radius:7px; display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0; }
+.aa1{background:linear-gradient(135deg,#7c4dff,#e040fb)} .aa2{background:linear-gradient(135deg,#ff1744,#ff6d00)} .aa3{background:linear-gradient(135deg,#00897b,#00e5ff)} .aa4{background:linear-gradient(135deg,#f9a825,#ff6f00)}
+.ac-info { flex:1; min-width:0; }
+.ac-name { font-size:11px; font-weight:600; color:#fff; margin-bottom:2px; }
+.ac-meta { font-size:9px; color:rgba(255,255,255,0.35); }
+.ac-dur { font-size:10px; color:var(--audio-accent); font-weight:600; }
+
+/* Video Player */
+.vp { width:100%; height:155px; background:#000; position:relative; flex-shrink:0; }
+.vp-bg { width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:42px; }
+.vp-ov { position:absolute; inset:0; background:linear-gradient(transparent 40%,rgba(0,0,0,0.7)); display:flex; flex-direction:column; justify-content:flex-end; padding:7px 10px; }
+.vp-prog { height:3px; background:rgba(255,255,255,0.25); border-radius:2px; margin-bottom:5px; overflow:hidden; }
+.vp-pf { height:100%; width:35%; background:var(--yt-red); }
+.vp-btm { display:flex; justify-content:space-between; align-items:center; }
+.vp-time { font-size:9px; color:#fff; font-weight:600; }
+.vp-ic { display:flex; gap:10px; font-size:13px; color:#fff; }
+.vp-ta { padding:7px 12px 3px; flex-shrink:0; }
+.vp-title { font-size:12px; font-weight:700; color:#fff; line-height:1.4; margin-bottom:2px; }
+.vp-meta { font-size:9px; color:var(--yt-muted); }
+.vp-acts { display:flex; gap:5px; padding:5px 12px; overflow-x:auto; flex-shrink:0; }
+.vp-acts::-webkit-scrollbar { display:none; }
+.vp-chip { display:flex; align-items:center; gap:3px; padding:4px 9px; background:var(--yt-card); border-radius:20px; border:1px solid var(--yt-border); white-space:nowrap; flex-shrink:0; }
+.vp-chip span { font-size:11px; }
+.vp-chip p { font-size:8px; font-weight:600; color:#fff; }
+
+/* Audio switch */
+.as { margin:5px 12px; background:linear-gradient(90deg,rgba(124,77,255,0.18),rgba(124,77,255,0.06)); border:1px solid var(--audio-accent); border-radius:10px; padding:8px 10px; display:flex; align-items:center; gap:8px; cursor:pointer; flex-shrink:0; position:relative; }
+.as-arrow { position:absolute; top:-20px; right:8px; background:var(--audio-accent); color:#fff; font-size:8px; font-weight:700; padding:2px 8px; border-radius:7px; white-space:nowrap; }
+.as-arrow::after { content:''; position:absolute; bottom:-5px; right:8px; border:5px solid transparent; border-top-color:var(--audio-accent); }
+.as-icon { font-size:18px; }
+.as-text { flex:1; }
+.as-title { font-size:11px; font-weight:700; color:#fff; }
+.as-sub { font-size:8px; color:rgba(255,255,255,0.4); margin-top:1px; }
+.as-sw { width:32px; height:18px; background:var(--audio-accent); border-radius:9px; position:relative; }
+.as-sw::after { content:''; position:absolute; right:3px; top:3px; width:12px; height:12px; background:#fff; border-radius:50%; }
+.vp-comments { flex:1; overflow-y:auto; padding:0 12px; }
+.vp-comments::-webkit-scrollbar { display:none; }
+.vp-ch { font-size:10px; font-weight:700; color:#fff; margin-bottom:5px; }
+.vp-cm { display:flex; gap:6px; margin-bottom:7px; }
+.vp-cav { width:22px; height:22px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:8px; font-weight:700; color:#fff; flex-shrink:0; }
+.vp-cn { font-size:9px; font-weight:700; color:#fff; }
+.vp-ct { font-size:9px; color:var(--yt-muted); line-height:1.4; }
+
+/* Audio player */
+.ap { flex:1; background:linear-gradient(180deg,#1a1a2e,#0d0d1a); display:flex; flex-direction:column; overflow:hidden; }
+.ap-hdr { display:flex; align-items:center; justify-content:space-between; padding:7px 14px 0; flex-shrink:0; }
+.ap-back { font-size:20px; color:#fff; }
+.ap-lbl { font-size:9px; font-weight:700; color:rgba(255,255,255,0.4); letter-spacing:1px; text-transform:uppercase; }
+.ap-more { font-size:20px; color:#fff; }
+.ap-art-w { display:flex; justify-content:center; padding:14px 32px 10px; flex-shrink:0; }
+.ap-art { width:170px; height:170px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:60px; box-shadow:0 0 50px rgba(124,77,255,0.4),0 16px 40px rgba(0,0,0,0.5); animation:spin 20s linear infinite; position:relative; }
+.ap-art::after { content:''; position:absolute; width:20px; height:20px; background:#0d0d1a; border-radius:50%; }
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+.ap-info { text-align:center; padding:0 18px; flex-shrink:0; margin-bottom:8px; }
+.ap-song { font-family:'DM Serif Display',serif; font-size:17px; color:#fff; margin-bottom:2px; }
+.ap-artist { font-size:10px; color:rgba(255,255,255,0.4); }
+.ap-prog { padding:0 16px; flex-shrink:0; margin-bottom:10px; }
+.ap-bar { height:4px; background:rgba(255,255,255,0.15); border-radius:2px; overflow:hidden; margin-bottom:4px; }
+.ap-fill { height:100%; width:42%; background:var(--audio-accent); }
+.ap-times { display:flex; justify-content:space-between; font-size:9px; color:rgba(255,255,255,0.3); }
+.ap-ctrls { display:flex; align-items:center; justify-content:space-between; padding:0 20px; flex-shrink:0; margin-bottom:10px; }
+.ap-ctrls span { font-size:20px; color:rgba(255,255,255,0.45); }
+.ap-play { width:50px; height:50px; border-radius:50%; background:var(--audio-accent); display:flex; align-items:center; justify-content:center; font-size:20px; color:#fff; box-shadow:0 6px 20px rgba(124,77,255,0.4); }
+.ap-src { margin:0 12px 7px; background:rgba(255,0,0,0.07); border:1px solid rgba(255,0,0,0.18); border-radius:7px; padding:5px 9px; display:flex; align-items:center; gap:6px; flex-shrink:0; }
+.ap-yt { width:16px; height:11px; background:var(--yt-red); border-radius:3px; display:flex; align-items:center; justify-content:center; font-size:6px; color:#fff; flex-shrink:0; }
+.ap-src-t { font-size:9px; color:rgba(255,255,255,0.4); }
+.ap-q { flex:1; overflow-y:auto; background:rgba(0,0,0,0.2); margin:0 12px 8px; border-radius:8px; padding:7px; }
+.ap-q::-webkit-scrollbar{display:none}
+.ap-qt { font-size:8px; font-weight:700; color:rgba(255,255,255,0.3); letter-spacing:1px; text-transform:uppercase; margin-bottom:5px; }
+.ap-qi { display:flex; align-items:center; gap:7px; padding:5px 0; border-bottom:1px solid rgba(255,255,255,0.04); }
+.ap-qi:last-child{border-bottom:none}
+.ap-qn { font-size:9px; color:rgba(255,255,255,0.25); width:12px; }
+.ap-qa { width:28px; height:28px; border-radius:5px; display:flex; align-items:center; justify-content:center; font-size:12px; flex-shrink:0; }
+.qa1{background:linear-gradient(135deg,#7c4dff,#e040fb)} .qa2{background:linear-gradient(135deg,#f00,#ff6d00)} .qa3{background:linear-gradient(135deg,#00897b,#00e5ff)}
+.ap-qi-i{flex:1;min-width:0}
+.ap-qi-n{font-size:10px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ap-qi-c{font-size:8px;color:rgba(255,255,255,0.3)}
+.ap-qi-d{font-size:8px;color:rgba(255,255,255,0.25)}
+.ap-qi.now .ap-qi-n{color:var(--audio-accent)}
+
+/* Active Audience */
+.s6v { width:100%; height:140px; position:relative; display:flex; align-items:center; justify-content:center; font-size:38px; flex-shrink:0; }
+.s6-live { position:absolute; top:6px; left:8px; background:var(--yt-red); color:#fff; font-size:8px; font-weight:800; padding:2px 6px; border-radius:3px; animation:blink 1.5s infinite; }
+.s6-views { position:absolute; top:6px; right:8px; background:rgba(0,0,0,0.75); color:#fff; font-size:8px; padding:2px 6px; border-radius:3px; }
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.5}}
+.s6-info { padding:6px 12px 3px; flex-shrink:0; }
+.s6-t { font-size:11px; font-weight:700; color:#fff; margin-bottom:1px; }
+.s6-m { font-size:9px; color:var(--yt-muted); }
+.aa-body { flex:1; overflow-y:auto; padding:7px 12px; }
+.aa-body::-webkit-scrollbar{display:none}
+.aa-hdr { display:flex; align-items:center; gap:6px; margin-bottom:7px; }
+.aa-dot { width:7px; height:7px; background:var(--active-green); border-radius:50%; animation:pulse2 1.5s infinite; }
+@keyframes pulse2{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.4);opacity:0.6}}
+.aa-t { font-size:10px; font-weight:700; color:#fff; }
+.aa-s { font-size:9px; color:var(--yt-muted); margin-left:auto; }
+.poll { background:var(--yt-card); border-radius:9px; padding:9px; margin-bottom:7px; border:1px solid var(--yt-border); }
+.poll-q { font-size:10px; font-weight:700; color:#fff; margin-bottom:6px; }
+.poll-o { padding:5px 7px; border-radius:6px; margin-bottom:4px; position:relative; overflow:hidden; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.07); cursor:pointer; }
+.pf { position:absolute; top:0; left:0; bottom:0; background:rgba(255,0,0,0.1); border-radius:6px; }
+.pf.w { background:rgba(0,230,118,0.15); }
+.pl { position:relative; z-index:1; display:flex; justify-content:space-between; }
+.pt { font-size:9px; color:#fff; }
+.pp { font-size:9px; font-weight:700; color:var(--active-green); }
+.pv { font-size:8px; color:var(--yt-muted); text-align:right; margin-top:4px; }
+.rb { background:var(--yt-card); border-radius:9px; padding:8px 9px; margin-bottom:7px; border:1px solid var(--yt-border); }
+.rb-t { font-size:10px; font-weight:700; color:#fff; margin-bottom:5px; }
+.rb-row { display:flex; gap:4px; flex-wrap:wrap; }
+.rb-chip { display:flex; align-items:center; gap:3px; background:rgba(255,255,255,0.07); border-radius:20px; padding:3px 7px; cursor:pointer; border:1px solid rgba(255,255,255,0.07); }
+.rb-e { font-size:13px; }
+.rb-c { font-size:9px; color:var(--yt-muted); font-weight:600; }
+.lc { background:var(--yt-card); border-radius:9px; padding:8px 9px; border:1px solid var(--yt-border); }
+.lc-t { font-size:10px; font-weight:700; color:#fff; margin-bottom:5px; }
+.lc-msg { display:flex; gap:5px; margin-bottom:4px; }
+.lc-av { width:17px; height:17px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:7px; font-weight:700; color:#fff; flex-shrink:0; }
+.lc-n { font-size:8px; font-weight:700; color:var(--yt-red); }
+.lc-m { font-size:8px; color:var(--yt-muted); line-height:1.4; }
+
+/* BG Play */
+.s7 { flex:1; background:linear-gradient(135deg,#1a1a2e,#16213e); display:flex; flex-direction:column; overflow:hidden; position:relative; }
+.s7-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; padding:14px 16px 0; }
+.s7-app { display:flex; flex-direction:column; align-items:center; gap:3px; }
+.s7-ic { width:38px; height:38px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:18px; }
+.s7-nm { font-size:8px; color:#fff; text-align:center; }
+.si1{background:#ff0000}.si2{background:linear-gradient(135deg,#f09433,#dc2743,#bc1888)}.si3{background:#1DB954}.si4{background:#1877f2}.si5{background:#000;border:1px solid #333}.si6{background:#ff6900}.si7{background:#0088cc}.si8{background:#25d366}
+.notif { position:absolute; top:148px; left:12px; right:12px; background:rgba(28,28,28,0.97); backdrop-filter:blur(20px); border-radius:13px; padding:10px 11px; box-shadow:0 20px 50px rgba(0,0,0,0.6); border:1px solid rgba(255,255,255,0.1); animation:slideDown 0.5s ease both; }
+@keyframes slideDown{from{opacity:0;transform:translateY(-14px)}to{opacity:1;transform:translateY(0)}}
+.notif-top { display:flex; align-items:center; gap:5px; margin-bottom:7px; }
+.notif-yt { width:17px; height:11px; background:var(--yt-red); border-radius:3px; display:flex; align-items:center; justify-content:center; font-size:6px; color:#fff; flex-shrink:0; }
+.notif-app { font-size:9px; color:var(--yt-muted); }
+.notif-time { font-size:9px; color:var(--yt-muted); margin-left:auto; }
+.notif-body { display:flex; align-items:center; gap:8px; }
+.notif-art { width:42px; height:42px; border-radius:7px; background:linear-gradient(135deg,#7c4dff,#e040fb); display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; }
+.notif-info { flex:1; min-width:0; }
+.notif-title { font-size:12px; font-weight:700; color:#fff; margin-bottom:1px; }
+.notif-sub { font-size:9px; color:var(--yt-muted); margin-bottom:4px; }
+.notif-badge { display:inline-flex; align-items:center; gap:3px; background:var(--audio-soft); border:1px solid var(--audio-accent); border-radius:7px; padding:2px 6px; font-size:8px; font-weight:700; color:var(--audio-accent); }
+.notif-ctrls { display:flex; align-items:center; justify-content:space-between; margin-top:9px; padding-top:8px; border-top:1px solid rgba(255,255,255,0.08); }
+.notif-prog { flex:1; height:3px; background:rgba(255,255,255,0.15); border-radius:2px; overflow:hidden; margin:0 8px; }
+.notif-pf { height:100%; width:42%; background:var(--audio-accent); }
+.notif-btns { display:flex; gap:10px; font-size:16px; color:#fff; }
+.notif-play { color:var(--audio-accent); font-size:20px; }
+.s7-dock { position:absolute; bottom:14px; left:14px; right:14px; background:rgba(255,255,255,0.12); backdrop-filter:blur(20px); border-radius:16px; padding:8px 16px; display:flex; justify-content:space-around; }
+.s7-di { font-size:20px; color:#fff; }
+.legend { display:flex; gap:14px; justify-content:center; margin-top:36px; flex-wrap:wrap; }
+.leg-item { display:flex; align-items:center; gap:6px; }
+.leg-dot { width:9px; height:9px; border-radius:50%; }
+.leg-text { font-size:10px; color:var(--yt-muted); }
+</style>
+</head>
+<body>
+<div class="page-title">
+  <h1>YouTube <span>Unified Platform</span></h1>
+  <p>7-screen user journey · Audio Mode + Active Audience · Concept by Ashok Kumar S</p>
+</div>
+<div class="flow">
+
+  <!-- S1 YouTube Home -->
+  <div class="screen-wrap">
+    <div class="step-badge">1</div>
+    <div class="screen-label">YouTube Home</div>
+    <div class="phone">
+      <div class="status"><span>9:41</span><div class="status-r"><span>●●●</span><span>🔋</span></div></div>
+      <div class="yt-hdr">
+        <div class="yt-logo"><div class="yt-logo-box">▶</div><div class="yt-logo-text">YouTube</div></div>
+        <div class="yt-hdr-right">
+          <span>🔔</span><span>🔍</span>
+          <div style="position:relative;">
+            <div class="audio-mode-btn">🎧 Audio</div>
+            <div class="tap-hint">Tap to switch ↑</div>
+          </div>
+        </div>
+      </div>
+      <div class="yt-pills"><div class="pill a">All</div><div class="pill i">🎵 Music</div><div class="pill i">🔴 Live</div><div class="pill i">Gaming</div><div class="pill i">Tech</div></div>
+      <div class="yt-feed">
+        <div class="yt-card"><div class="yt-thumb"><div class="yt-thumb-bg t1">🎵</div><div class="yt-audio-tag">🎧 AUDIO</div><div class="yt-dur">4:21</div></div><div class="yt-card-info"><div class="yt-av av-r">S</div><div class="yt-ct"><div class="yt-ct-title">Kesariya — Arijit Singh | Brahmastra</div><div class="yt-ct-meta">Sony Music · 142M views</div></div><div class="yt-dots">⋯</div></div></div>
+        <div class="yt-card"><div class="yt-thumb"><div class="yt-thumb-bg t2">🎮</div><div class="yt-dur">12:34</div></div><div class="yt-card-info"><div class="yt-av av-b">T</div><div class="yt-ct"><div class="yt-ct-title">Top 10 AI Tools You Need in 2026</div><div class="yt-ct-meta">TechVault · 2.4M views</div></div><div class="yt-dots">⋯</div></div></div>
+        <div class="yt-card"><div class="yt-thumb"><div class="yt-thumb-bg t3">🔴</div><div class="yt-live-tag">● LIVE</div></div><div class="yt-card-info"><div class="yt-av av-g">C</div><div class="yt-ct"><div class="yt-ct-title">IPL 2026 LIVE | CSK vs MI | Match 42</div><div class="yt-ct-meta">Star Sports · 890K watching</div></div><div class="yt-dots">⋯</div></div></div>
+      </div>
+      <div class="yt-nav"><div class="yt-nav-item active"><span>🏠</span>Home</div><div class="yt-nav-item"><span>🔍</span>Explore</div><div class="yt-nav-item"><span>➕</span>Create</div><div class="yt-nav-item"><span>📱</span>Shorts</div><div class="yt-nav-item"><span>📚</span>Library</div></div>
+    </div>
+  </div>
+
+  <div class="arrow">→</div>
+
+  <!-- S2 Audio Mode Home -->
+  <div class="screen-wrap">
+    <div class="step-badge">2</div>
+    <div class="screen-label">Audio Mode Home</div>
+    <div class="phone">
+      <div class="status"><span>9:41</span><div class="status-r"><span>●●●</span><span>🔋</span></div></div>
+      <div class="yt-hdr">
+        <div class="yt-logo"><div class="yt-logo-box">▶</div><div class="yt-logo-text">YouTube</div></div>
+        <div class="yt-hdr-right">
+          <span>🔔</span><span>🔍</span>
+          <div class="video-mode-btn">📺 Video</div>
+        </div>
+      </div>
+      <div class="audio-home">
+        <div class="anp"><div class="anp-art">🎵</div><div class="anp-info"><div class="anp-name">Kesariya</div><div class="anp-sub">🎧 Now playing in Audio Mode</div></div><div class="anp-play">▶</div></div>
+        <div class="ah-title">Audio Library</div>
+        <div class="ah-sub">All your music, podcasts & more</div>
+        <div class="ac"><div class="ac-art aa1">🎵</div><div class="ac-info"><div class="ac-name">Kesariya</div><div class="ac-meta">Arijit Singh · 142M plays</div></div><div class="ac-dur">4:21</div></div>
+        <div class="ac"><div class="ac-art aa2">🎤</div><div class="ac-info"><div class="ac-name">Tum Hi Ho</div><div class="ac-meta">Arijit Singh · 98M plays</div></div><div class="ac-dur">4:38</div></div>
+        <div class="ac"><div class="ac-art aa3">🎶</div><div class="ac-info"><div class="ac-name">Raataan Lambiyan</div><div class="ac-meta">Jubin Nautiyal · 76M plays</div></div><div class="ac-dur">3:42</div></div>
+        <div class="ac"><div class="ac-art aa4">🎺</div><div class="ac-info"><div class="ac-name">Vande Mataram</div><div class="ac-meta">AR Rahman · 55M plays</div></div><div class="ac-dur">6:14</div></div>
+      </div>
+      <div class="yt-nav"><div class="yt-nav-item active"><span>🏠</span>Home</div><div class="yt-nav-item"><span>🔍</span>Explore</div><div class="yt-nav-item"><span>➕</span>Create</div><div class="yt-nav-item"><span>📱</span>Shorts</div><div class="yt-nav-item"><span>📚</span>Library</div></div>
+    </div>
+  </div>
+
+  <div class="arrow">→</div>
+
+  <!-- S3 Select Video -->
+  <div class="screen-wrap">
+    <div class="step-badge">3</div>
+    <div class="screen-label">Select a Video</div>
+    <div class="phone">
+      <div class="status"><span>9:41</span><div class="status-r"><span>●●●</span><span>🔋</span></div></div>
+      <div class="yt-hdr">
+        <div class="yt-logo"><div class="yt-logo-box">▶</div><div class="yt-logo-text">YouTube</div></div>
+        <div class="yt-hdr-right"><span>🔔</span><span>🔍</span><div class="audio-mode-btn">🎧 Audio</div></div>
+      </div>
+      <div class="yt-pills"><div class="pill a">All</div><div class="pill i">🎵 Music</div><div class="pill i">🔴 Live</div><div class="pill i">Gaming</div></div>
+      <div class="yt-feed">
+        <div class="yt-card"><div class="yt-thumb"><div class="yt-thumb-bg t1">🎵</div><div class="yt-audio-tag">🎧 AUDIO</div><div class="yt-dur">4:21</div><div class="select-ring"></div></div><div class="yt-card-info"><div class="yt-av av-r">S</div><div class="yt-ct"><div class="yt-ct-title">Kesariya — Arijit Singh | Brahmastra</div><div class="yt-ct-meta">Sony Music · 142M views</div></div><div class="yt-dots">⋯</div></div></div>
+        <div class="yt-card" style="opacity:0.35;"><div class="yt-thumb"><div class="yt-thumb-bg t2">🎮</div><div class="yt-dur">12:34</div></div><div class="yt-card-info"><div class="yt-av av-b">T</div><div class="yt-ct"><div class="yt-ct-title">Top 10 AI Tools You Need in 2026</div><div class="yt-ct-meta">TechVault · 2.4M views</div></div></div></div>
+        <div class="yt-card" style="opacity:0.35;"><div class="yt-thumb"><div class="yt-thumb-bg t4">🌿</div><div class="yt-dur">8:22</div></div><div class="yt-card-info"><div class="yt-av av-o">N</div><div class="yt-ct"><div class="yt-ct-title">Morning Meditation — 10 minutes</div><div class="yt-ct-meta">MindSpace · 14M views</div></div></div></div>
+      </div>
+      <div class="yt-nav"><div class="yt-nav-item active"><span>🏠</span>Home</div><div class="yt-nav-item"><span>🔍</span>Explore</div><div class="yt-nav-item"><span>➕</span>Create</div><div class="yt-nav-item"><span>📱</span>Shorts</div><div class="yt-nav-item"><span>📚</span>Library</div></div>
+    </div>
+  </div>
+
+  <div class="arrow">→</div>
+
+  <!-- S4 Video Player + Audio Switch -->
+  <div class="screen-wrap">
+    <div class="step-badge">4</div>
+    <div class="screen-label">Video Player + Switch</div>
+    <div class="phone">
+      <div class="status"><span>9:41</span><div class="status-r"><span>●●●</span><span>🔋</span></div></div>
+      <div class="vp"><div class="vp-bg t1">🎵</div><div class="vp-ov"><div class="vp-prog"><div class="vp-pf"></div></div><div class="vp-btm"><div class="vp-time">1:47 / 4:21</div><div class="vp-ic"><span>⚙️</span><span>⛶</span></div></div></div></div>
+      <div class="vp-ta"><div class="vp-title">Kesariya — Arijit Singh | Brahmastra</div><div class="vp-meta">142M views · Sony Music India</div></div>
+      <div class="vp-acts"><div class="vp-chip"><span>👍</span><p>1.2M</p></div><div class="vp-chip"><span>👎</span><p>Dislike</p></div><div class="vp-chip"><span>↗</span><p>Share</p></div><div class="vp-chip"><span>➕</span><p>Save</p></div></div>
+      <div class="as">
+        <div class="as-arrow">Tap to switch ↓</div>
+        <div class="as-icon">🎧</div>
+        <div class="as-text"><div class="as-title">Switch to Audio Mode</div><div class="as-sub">Save data · Background play · Lock screen controls</div></div>
+        <div class="as-sw"></div>
+      </div>
+      <div class="vp-comments">
+        <div class="vp-ch">Comments · 48K</div>
+        <div class="vp-cm"><div class="vp-cav" style="background:#e53935;">R</div><div><div class="vp-cn">Riya_music</div><div class="vp-ct">This song hits different at 2AM 😭❤️</div></div></div>
+        <div class="vp-cm"><div class="vp-cav" style="background:#1565c0;">K</div><div><div class="vp-cn">Karthik_beats</div><div class="vp-ct">Arijit Singh never misses 🔥</div></div></div>
+        <div class="vp-cm"><div class="vp-cav" style="background:#2e7d32;">S</div><div><div class="vp-cn">Sneha27</div><div class="vp-ct">Audio mode on YouTube is 🤌</div></div></div>
+      </div>
+      <div class="yt-nav"><div class="yt-nav-item active"><span>🏠</span>Home</div><div class="yt-nav-item"><span>🔍</span>Explore</div><div class="yt-nav-item"><span>➕</span>Create</div><div class="yt-nav-item"><span>📱</span>Shorts</div><div class="yt-nav-item"><span>📚</span>Library</div></div>
+    </div>
+  </div>
+
+  <div class="arrow">→</div>
+
+  <!-- S5 Audio Player -->
+  <div class="screen-wrap">
+    <div class="step-badge">5</div>
+    <div class="screen-label">Audio Player</div>
+    <div class="phone">
+      <div class="status" style="color:#fff;"><span>9:41</span><div class="status-r"><span>●●●</span><span>🔋</span></div></div>
+      <div class="ap">
+        <div class="ap-hdr"><div class="ap-back">‹</div><div class="ap-lbl">Audio Mode</div><div class="ap-more">⋯</div></div>
+        <div class="ap-art-w"><div style="position:relative;"><div class="ap-art" style="background:linear-gradient(135deg,#7c4dff,#e040fb);">🎵</div></div></div>
+        <div class="ap-info"><div class="ap-song">Kesariya</div><div class="ap-artist">Arijit Singh · Brahmastra · Sony Music</div></div>
+        <div class="ap-prog"><div class="ap-bar"><div class="ap-fill"></div></div><div class="ap-times"><span>1:47</span><span>4:21</span></div></div>
+        <div class="ap-ctrls"><span>⇄</span><span>⏮</span><div class="ap-play">▶</div><span>⏭</span><span>↻</span></div>
+        <div class="ap-src"><div class="ap-yt">▶</div><div class="ap-src-t">Playing via YouTube · Audio Mode active</div></div>
+        <div class="ap-q">
+          <div class="ap-qt">Up Next</div>
+          <div class="ap-qi now"><div class="ap-qn">▶</div><div class="ap-qa qa1">🎵</div><div class="ap-qi-i"><div class="ap-qi-n">Kesariya</div><div class="ap-qi-c">Arijit Singh</div></div><div class="ap-qi-d">4:21</div></div>
+          <div class="ap-qi"><div class="ap-qn">2</div><div class="ap-qa qa2">🎤</div><div class="ap-qi-i"><div class="ap-qi-n">Tum Hi Ho</div><div class="ap-qi-c">Arijit Singh</div></div><div class="ap-qi-d">4:38</div></div>
+          <div class="ap-qi"><div class="ap-qn">3</div><div class="ap-qa qa3">🎶</div><div class="ap-qi-i"><div class="ap-qi-n">Raataan Lambiyan</div><div class="ap-qi-c">Jubin Nautiyal</div></div><div class="ap-qi-d">3:42</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow">→</div>
+
+  <!-- S6 Active Audience -->
+  <div class="screen-wrap">
+    <div class="step-badge">6</div>
+    <div class="screen-label">Active Audience</div>
+    <div class="phone">
+      <div class="status"><span>9:41</span><div class="status-r"><span>●●●</span><span>🔋</span></div></div>
+      <div class="s6v t3">🎮<div class="s6-live">● LIVE</div><div class="s6-views">👁 890K watching</div></div>
+      <div class="s6-info"><div class="s6-t">IPL 2026 LIVE | CSK vs MI | Match 42</div><div class="s6-m">Star Sports · Started 2 hrs ago</div></div>
+      <div class="aa-body">
+        <div class="aa-hdr"><div class="aa-dot"></div><div class="aa-t">Active Audience</div><div class="aa-s">890K live</div></div>
+        <div class="poll">
+          <div class="poll-q">🏏 Who will win today?</div>
+          <div class="poll-o"><div class="pf w" style="width:64%"></div><div class="pl"><span class="pt">🟡 Chennai Super Kings</span><span class="pp">64%</span></div></div>
+          <div class="poll-o" style="margin-top:4px;"><div class="pf" style="width:36%"></div><div class="pl"><span class="pt">🔵 Mumbai Indians</span><span class="pp">36%</span></div></div>
+          <div class="pv">421K votes · 8 min left</div>
+        </div>
+        <div class="rb"><div class="rb-t">⚡ React Live</div><div class="rb-row"><div class="rb-chip"><span class="rb-e">🔥</span><span class="rb-c">24K</span></div><div class="rb-chip"><span class="rb-e">😱</span><span class="rb-c">18K</span></div><div class="rb-chip"><span class="rb-e">👏</span><span class="rb-c">12K</span></div><div class="rb-chip"><span class="rb-e">🏏</span><span class="rb-c">31K</span></div></div></div>
+        <div class="lc"><div class="lc-t">💬 Live Chat</div><div class="lc-msg"><div class="lc-av" style="background:#e53935;">R</div><div><div class="lc-n">@RajeshCSK</div><div class="lc-m">Dhoni finishing it 🏏🔥</div></div></div><div class="lc-msg"><div class="lc-av" style="background:#1565c0;">V</div><div><div class="lc-n">@Vikram_MI</div><div class="lc-m">Come on Mumbai!! 💙</div></div></div><div class="lc-msg"><div class="lc-av" style="background:#f57c00;">P</div><div><div class="lc-n">@Priya</div><div class="lc-m">Poll feature is 🔥 YouTube!</div></div></div></div>
+      </div>
+      <div class="yt-nav"><div class="yt-nav-item active"><span>🏠</span>Home</div><div class="yt-nav-item"><span>🔍</span>Explore</div><div class="yt-nav-item"><span>➕</span>Create</div><div class="yt-nav-item"><span>📱</span>Shorts</div><div class="yt-nav-item"><span>📚</span>Library</div></div>
+    </div>
+  </div>
+
+  <div class="arrow">→</div>
+
+  <!-- S7 Background Play -->
+  <div class="screen-wrap">
+    <div class="step-badge">7</div>
+    <div class="screen-label">Background Play</div>
+    <div class="phone">
+      <div class="status" style="color:#fff;"><span>9:41</span><div class="status-r"><span>●●●</span><span>🔋</span></div></div>
+      <div class="s7">
+        <div class="s7-grid">
+          <div class="s7-app"><div class="s7-ic si1">▶</div><div class="s7-nm">YouTube</div></div>
+          <div class="s7-app"><div class="s7-ic si2">📷</div><div class="s7-nm">Instagram</div></div>
+          <div class="s7-app"><div class="s7-ic si3">🎵</div><div class="s7-nm">Spotify</div></div>
+          <div class="s7-app"><div class="s7-ic si4">f</div><div class="s7-nm">Facebook</div></div>
+          <div class="s7-app"><div class="s7-ic si5">✦</div><div class="s7-nm">X</div></div>
+          <div class="s7-app"><div class="s7-ic si6">📦</div><div class="s7-nm">Amazon</div></div>
+          <div class="s7-app"><div class="s7-ic si7">✈️</div><div class="s7-nm">Telegram</div></div>
+          <div class="s7-app"><div class="s7-ic si8">💬</div><div class="s7-nm">WhatsApp</div></div>
+        </div>
+        <div class="notif">
+          <div class="notif-top"><div class="notif-yt">▶</div><div class="notif-app">YouTube</div><div class="notif-time">now</div></div>
+          <div class="notif-body">
+            <div class="notif-art">🎵</div>
+            <div class="notif-info"><div class="notif-title">Kesariya</div><div class="notif-sub">Arijit Singh · Brahmastra</div><div class="notif-badge">🎧 Audio Mode — Background</div></div>
+          </div>
+          <div class="notif-ctrls"><div class="notif-btns"><span>⏮</span></div><div class="notif-prog"><div class="notif-pf"></div></div><div class="notif-btns"><span class="notif-play">⏸</span><span>⏭</span></div></div>
+        </div>
+        <div class="s7-dock"><div class="s7-di">📞</div><div class="s7-di">📷</div><div class="s7-di">🌐</div><div class="s7-di">✉️</div></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="legend">
+  <div class="leg-item"><div class="leg-dot" style="background:#ff0000"></div><div class="leg-text">YouTube Platform</div></div>
+  <div class="leg-item"><div class="leg-dot" style="background:#7c4dff"></div><div class="leg-text">Audio Mode</div></div>
+  <div class="leg-item"><div class="leg-dot" style="background:#00e676"></div><div class="leg-text">Active Audience</div></div>
+  <div class="leg-item"><div class="leg-dot" style="background:#aaa"></div><div class="leg-text">Concept by Ashok Kumar S · github.com/ashokkumarone</div></div>
+</div>
+</body>
+</html>
